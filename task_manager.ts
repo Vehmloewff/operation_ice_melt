@@ -4,7 +4,7 @@ import { ProgressBar, progressBarWidgets } from './deps.ts'
 const anySelf = self as any
 
 /** Meant to be run inside a worker context. `fn` is called whenever a new task is sent to the worker */
-export function onTaskReceived(fn: (task: Task) => unknown): void {
+export function onTaskReceived<T>(fn: (task: Task<T>) => unknown): void {
 	anySelf.onmessage = fn
 }
 
@@ -18,22 +18,22 @@ export function registerTaskCompletion(): void {
 	anySelf.postMessage('done')
 }
 
-export interface Task {
-	data: unknown
+export interface Task<T> {
+	data: T
 	steps: number
 }
 
 export class TaskManager {
-	#taskFile: string
-	#tasks: Task[] = []
+	#taskFile: string | URL
+	#tasks: Task<unknown>[] = []
 
 	#onStep: VoidFunction | null = null
 
-	constructor(taskFile: string) {
+	constructor(taskFile: string | URL) {
 		this.#taskFile = taskFile
 	}
 
-	queueTask(task: Task): void {
+	queueTask<T>(task: Task<T>): void {
 		this.#tasks.push(task)
 	}
 
@@ -79,7 +79,7 @@ export class TaskManager {
 		this.#onStep()
 	}
 
-	async #executeTask(worker: Worker, task: Task) {
+	async #executeTask(worker: Worker, task: Task<unknown>) {
 		const donePromise = new Promise<void>((resolve) => {
 			worker.onmessage = ({ data }) => {
 				if (data === 'step') this.#step()
