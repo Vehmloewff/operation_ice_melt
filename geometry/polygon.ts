@@ -19,8 +19,6 @@ export function isInsidePolygon(point: Point, polygon: Point[]): boolean {
 
 		if (doIntersect(point, rayEndPoint, lastPoint, polygonPoint)) intersectionCount++
 
-		// `test (${point.x},${point.y}) (${rayEndPoint.x},${rayEndPoint.y}) <-> (${lastPoint.x},${lastPoint.y}) (${point.x},${point.y})`,
-
 		lastPoint = polygonPoint
 	}
 
