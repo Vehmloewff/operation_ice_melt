@@ -12,10 +12,13 @@ export interface FillTilesCommand {
 }
 
 onTaskReceived<FillTilesCommand>(async (task) => {
+	if (task.steps < 1000) throw new Error('There must be and equal or greater amount of steps than tiles in a tile group row')
+
 	const tiles: Tile[] = await dtils.readJson(task.data.tileGroupFile)
+	const divider = tiles.length / task.steps
 
 	for (const tile of tiles) {
-		if (tile.x % 100 === 0) registerStep()
+		if (tile.x % divider === 0) registerStep()
 
 		for (const path of task.data.paths) {
 			if (!isInsidePolygon({ x: tile.x, y: tile.y }, path)) continue

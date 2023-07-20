@@ -10,17 +10,17 @@ export interface FillTilesParams {
 }
 
 export async function fillTiles(params: FillTilesParams): Promise<void> {
-	const manager = new TaskManager(new URL('./generate_tiles.worker.ts', import.meta.url))
+	const manager = new TaskManager(new URL('./fill_tiles.worker.ts', import.meta.url))
 
-	for await (const entry of Deno.readDir('map')) {
+	for await (const entry of Deno.readDir('map/tile_groups')) {
 		manager.queueTask<FillTilesCommand>({
 			data: {
 				paths: params.paths,
 				resources: params.resources,
 				terrain: params.terrain,
-				tileGroupFile: `map/${entry.name}`,
+				tileGroupFile: `map/tile_groups/${entry.name}`,
 			},
-			steps: 10000,
+			steps: 1000,
 		})
 	}
 

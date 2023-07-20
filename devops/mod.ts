@@ -20,5 +20,3 @@ export async function earth(): Promise<void> {
 	console.log('Filling in the land...')
 	await fillTiles({ paths, resources: {}, terrain: 'forest' })
 }
-
-await earth()

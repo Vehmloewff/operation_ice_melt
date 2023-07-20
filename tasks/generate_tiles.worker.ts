@@ -4,6 +4,8 @@ import { onTaskReceived, registerStep, registerTaskCompletion } from '../task_ma
 import { Point } from '../types.ts'
 
 onTaskReceived<Point>(async ({ data: thousandsPoint, steps }) => {
+	if (steps < 1000) throw new Error('There must be and equal or greater amount of steps than tiles in a tile group row')
+
 	const tiles: Tile[] = []
 
 	const xStart = 1000 * thousandsPoint.x
