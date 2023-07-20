@@ -4,8 +4,6 @@ import { onTaskReceived, registerStep, registerTaskCompletion } from '../task_ma
 import { Point } from '../types.ts'
 
 onTaskReceived<Point>(async ({ data: thousandsPoint, steps }) => {
-	if (steps !== 10000) throw new Error('Expected a step every 100 tiles')
-
 	const tiles: Tile[] = []
 
 	const xStart = 1000 * thousandsPoint.x
@@ -13,15 +11,23 @@ onTaskReceived<Point>(async ({ data: thousandsPoint, steps }) => {
 	const yStart = 1000 * thousandsPoint.y
 	const yEnd = yStart + 1000
 
-	for (let x = xStart; x <= xEnd; x++) {
-		for (let y = yStart; y <= yEnd; y++) {
-			if (y % 100 === 0) registerStep()
+	const total = (yEnd - yStart) * (xEnd - xStart)
+	const divider = total / steps
+
+	let stepsRegistered = 0
+
+	for (let y = yStart; y < yEnd; y++) {
+		for (let x = xStart; x < xEnd; x++) {
+			if (x % divider === 0) {
+				registerStep()
+				stepsRegistered++
+			}
 
 			tiles.push({ x, y, resources: {}, terrain: 'sea' })
 		}
 	}
 
-	await dtils.writeJson(`map/tile_groups/${thousandsPoint.x}x${thousandsPoint.y}.json`, [], { separator: '\t' })
+	await dtils.writeJson(`map/tile_groups/${thousandsPoint.x}x${thousandsPoint.y}.json`, tiles, { separator: '\t' })
 
 	registerTaskCompletion()
 })

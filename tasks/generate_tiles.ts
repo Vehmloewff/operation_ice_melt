@@ -9,7 +9,7 @@ export async function generateTileGroups(width: number, height: number): Promise
 
 	for (let verticalIndex = 0; verticalIndex < groupsVertical; verticalIndex++) {
 		for (let horizontalIndex = 0; horizontalIndex < groupsHorizontal; horizontalIndex++) {
-			manager.queueTask<Point>({ data: { x: horizontalIndex, y: verticalIndex }, steps: 10000 })
+			manager.queueTask<Point>({ data: { x: horizontalIndex, y: verticalIndex }, steps: 1000 })
 		}
 	}
 

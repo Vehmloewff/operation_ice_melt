@@ -14,6 +14,8 @@ export async function getMapShapes(url: string): Promise<GeoShape[]> {
 	const shapesDirectoryPath = 'temp/shape'
 	const shapeJsonPath = 'temp/shapes.json'
 
+	if (await dtils.exists(shapeJsonPath)) return await dtils.readJson(shapeJsonPath)
+
 	console.log('Downloading...')
 	const response = await fetch(url)
 

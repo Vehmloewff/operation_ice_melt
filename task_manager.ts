@@ -5,7 +5,10 @@ const anySelf = self as any
 
 /** Meant to be run inside a worker context. `fn` is called whenever a new task is sent to the worker */
 export function onTaskReceived<T>(fn: (task: Task<T>) => unknown): void {
-	anySelf.onmessage = fn
+	// deno-lint-ignore no-explicit-any
+	anySelf.onmessage = async (event: any) => await fn(event.data[1])
+
+	anySelf.postMessage('ready')
 }
 
 /** Meant to be run inside a worker context. Notifies the TaskManager that a step in the current task was completed */
@@ -26,11 +29,16 @@ export interface Task<T> {
 export class TaskManager {
 	#taskFile: string | URL
 	#tasks: Task<unknown>[] = []
+	// #setupData: unknown
 
 	#onStep: VoidFunction | null = null
 
-	constructor(taskFile: string | URL) {
+	constructor(
+		taskFile: string | URL,
+		// setupData: unknown,
+	) {
 		this.#taskFile = taskFile
+		// this.#setupData = setupData
 	}
 
 	queueTask<T>(task: Task<T>): void {
@@ -63,6 +71,14 @@ export class TaskManager {
 			deno: { permissions: 'inherit' },
 		})
 
+		await new Promise<void>((resolve) => {
+			worker.onmessage = ({ data }) => {
+				if (data === 'ready') resolve()
+			}
+		})
+
+		// worker.postMessage(['setup', this.#setupData])
+
 		while (this.#tasks.length) {
 			const task = this.#tasks.shift()
 			if (!task) throw new Error('Encountered a race condition')
@@ -87,7 +103,7 @@ export class TaskManager {
 			}
 		})
 
-		worker.postMessage(task)
+		worker.postMessage(['task', task])
 
 		await donePromise
 	}
