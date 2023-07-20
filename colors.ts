@@ -1,4 +1,4 @@
-import { Terrain } from '../map/tile.ts'
+import { Terrain } from './map_types.ts'
 
 export type Color = [number, number, number, number]
 

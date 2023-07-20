@@ -1,9 +1,6 @@
 // Adapted from https://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/
 
-export interface Point {
-	x: number
-	y: number
-}
+import { Point } from '../types.ts'
 
 /**
  * Given three collinear points p, q, r, the function checks if

@@ -1,5 +1,6 @@
-import { asserts } from './deps.ts'
-import { doIntersect, Point } from './lines_intersect.ts'
+import { asserts } from '../deps.ts'
+import { Point } from '../types.ts'
+import { doIntersect } from './lines_intersect.ts'
 
 Deno.test('Parallel lines don\'t intersect', () => {
 	const p1: Point = { x: 1, y: 1 }

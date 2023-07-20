@@ -1,6 +1,4 @@
-import { dtils, pathUtils } from './deps.ts'
-
-const TEMP_DIR = 'build_map/temp'
+import { dtils, pathUtils } from '../deps.ts'
 
 export interface GeoPoint {
 	lat: number
@@ -12,9 +10,9 @@ export interface GeoShape {
 }
 
 export async function getMapShapes(url: string): Promise<GeoShape[]> {
-	const zipFilePath = pathUtils.join(TEMP_DIR, 'shape.zip')
-	const shapesDirectoryPath = pathUtils.join(TEMP_DIR, 'shape')
-	const shapeJsonPath = pathUtils.join(TEMP_DIR, 'shapes.json')
+	const zipFilePath = 'temp/shape.zip'
+	const shapesDirectoryPath = 'temp/shape'
+	const shapeJsonPath = 'temp/shapes.json'
 
 	console.log('Downloading...')
 	const response = await fetch(url)
@@ -28,7 +26,7 @@ export async function getMapShapes(url: string): Promise<GeoShape[]> {
 	const shapeFilePath = await findFileWithExtension(shapesDirectoryPath, 'shp')
 
 	console.log('Parsing shapes file...')
-	await runPythonScript('build_map/shape_to_json.py', [shapeFilePath, shapeJsonPath])
+	await runPythonScript('geo_shape/shape_to_json.py', [shapeFilePath, shapeJsonPath])
 
 	console.log('Loading parsed data...')
 	return await dtils.readJson(shapeJsonPath)

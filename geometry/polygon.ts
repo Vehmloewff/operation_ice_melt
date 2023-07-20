@@ -1,4 +1,5 @@
-import { doIntersect, Point } from './lines_intersect.ts'
+import { Point } from '../types.ts'
+import { doIntersect } from './lines_intersect.ts'
 
 /** Returns true if line `l1`, `l2` is inside `polygon` */
 export function isInsidePolygon(point: Point, polygon: Point[]): boolean {

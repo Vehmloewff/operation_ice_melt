@@ -1,5 +1,5 @@
+import { Point } from '../types.ts'
 import { GeoPoint } from './get_shapes.ts'
-import { Point } from './lines_intersect.ts'
 
 /** Takes in a latitude and longitude, applies the mercator projection algorithm to it, and spits out a 24kx24k sized projection */
 export function applyMercatorProjection(geo: GeoPoint): Point {
