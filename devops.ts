@@ -1,7 +1,7 @@
-import { getPathsFromShapeFile } from '../geo_shape/mod.ts'
-import { EARTH_LAND_DATA } from '../sources.ts'
-import { fillTiles } from '../tasks/fill_tiles.ts'
-import { generateTileGroups } from '../tasks/mod.ts'
+import { getPathsFromShapeFile } from './geo_shape/mod.ts'
+import { EARTH_LAND_DATA } from './sources.ts'
+import { fillTiles } from './tasks/fill_tiles.ts'
+import { generateTileGroups } from './tasks/mod.ts'
 import { dtils } from './deps.ts'
 
 export async function ci(): Promise<void> {
