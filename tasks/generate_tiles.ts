@@ -7,12 +7,8 @@ export async function generateTileGroups(width: number, height: number): Promise
 	const groupsHorizontal = width / 1000
 	const groupsVertical = height / 1000
 
-	const totalColumns = width / 1000
-
-	for (let horizontalIndex = 0; horizontalIndex < groupsHorizontal; horizontalIndex++) {
-		console.log(`Generating tile group column ${horizontalIndex + 1}/${totalColumns}...`)
-
-		for (let verticalIndex = 0; verticalIndex < groupsVertical; verticalIndex++) {
+	for (let verticalIndex = 0; verticalIndex < groupsVertical; verticalIndex++) {
+		for (let horizontalIndex = 0; horizontalIndex < groupsHorizontal; horizontalIndex++) {
 			manager.queueTask<Point>({ data: { x: horizontalIndex, y: verticalIndex }, steps: 10000 })
 		}
 	}
