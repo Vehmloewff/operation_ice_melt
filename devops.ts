@@ -5,7 +5,7 @@ import { generateTileGroups } from './tasks/mod.ts'
 import { dtils } from './deps.ts'
 
 export async function ci(): Promise<void> {
-	await dtils.check({ permissions: 'all' })
+	await dtils.check({ permissions: 'all', unstable: true })
 }
 
 export async function earth(): Promise<void> {
