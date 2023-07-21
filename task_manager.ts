@@ -1,4 +1,6 @@
 import { ProgressBar, progressBarWidgets } from './deps.ts'
+import { sum } from './helpers.ts'
+import { makeTimeRemainingWidget } from './time_remaining.ts'
 
 // deno-lint-ignore no-explicit-any
 const anySelf = self as any
@@ -48,7 +50,7 @@ export class TaskManager {
 	async run(): Promise<void> {
 		const bar = new ProgressBar({
 			total: sum(this.#tasks.map((task) => task.steps)),
-			widgets: [progressBarWidgets.percentageWidget, progressBarWidgets.amountWidget],
+			widgets: [progressBarWidgets.percentageWidget, makeTimeRemainingWidget({ reportRawMs: true })],
 		})
 		await bar.start()
 
@@ -58,7 +60,7 @@ export class TaskManager {
 			bar.update(++step)
 		}
 
-		await Promise.all(buildArray(navigator.hardwareConcurrency, () => this.#makeTaskRunner()))
+		await Promise.all(buildArray(navigator.hardwareConcurrency * 2, () => this.#makeTaskRunner()))
 
 		this.#onStep = null
 
@@ -107,14 +109,6 @@ export class TaskManager {
 
 		await donePromise
 	}
-}
-
-function sum(numbers: number[]) {
-	let sum = 0
-
-	for (const number of numbers) sum += number
-
-	return sum
 }
 
 function buildArray<T>(length: number, builder: () => T): T[] {

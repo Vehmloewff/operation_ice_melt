@@ -4,6 +4,7 @@ import { Point } from '../types.ts'
 import type { FillTilesCommand } from './fill_tiles.worker.ts'
 
 export interface FillTilesParams {
+	tileGroupFile: string
 	paths: Point[][]
 	terrain: Terrain
 	resources: Resources
@@ -18,7 +19,7 @@ export async function fillTiles(params: FillTilesParams): Promise<void> {
 				paths: params.paths,
 				resources: params.resources,
 				terrain: params.terrain,
-				tileGroupFile: `map/tile_groups/${entry.name}`,
+				tiles: `map/tile_groups/${entry.name}`,
 			},
 			steps: 1000,
 		})
