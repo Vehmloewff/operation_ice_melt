@@ -1,6 +1,6 @@
-import { dtils } from '../deps.ts'
 import { Tile } from '../map_types.ts'
 import { onTaskReceived, registerStep, registerTaskCompletion } from '../task_manager.ts'
+import { setTileGroup } from '../tile_groups.ts'
 import { Point } from '../types.ts'
 
 onTaskReceived<Point>(async ({ data: thousandsPoint, steps }) => {
@@ -29,7 +29,7 @@ onTaskReceived<Point>(async ({ data: thousandsPoint, steps }) => {
 		}
 	}
 
-	await dtils.writeJson(`map/tile_groups/${thousandsPoint.x}x${thousandsPoint.y}.json`, tiles, { separator: '\t' })
+	await setTileGroup(`${thousandsPoint.x}x${thousandsPoint.y}`, tiles)
 
 	registerTaskCompletion(null)
 })
