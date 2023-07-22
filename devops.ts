@@ -129,7 +129,7 @@ export async function mapToPng(args: string[]): Promise<void> {
 	const [zoomRaw] = args
 	if (!zoomRaw) throw new Error('Expected a zoom argument')
 
-	const zoom = parseInt(zoomRaw)
+	const zoom = parseFloat(zoomRaw)
 	if (isNaN(zoom)) throw new Error(`Expected zoom as a number, but got "${zoomRaw}"`)
 
 	await api.mapToPng('temp/map.png', zoom)

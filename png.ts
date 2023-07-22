@@ -1,13 +1,13 @@
 import { getColorForTerrain } from './colors.ts'
-import { Canvas, dtils, ProgressBar } from './deps.ts'
-import { getMapViewBox, getTileGroup } from './tile_groups.ts'
+import { Canvas, ProgressBar } from './deps.ts'
+import { getMapGroups, getMapViewBox, getTileGroup } from './tile_groups.ts'
 
 export async function mapToPng(outFile: string, zoom: number): Promise<void> {
 	if (zoom > 1) throw new Error('Can not do zooming in with png images')
 	if (zoom < 0.0001) throw new Error('Can not do zooming smaller than .0001')
 
 	const spacer = 1 / zoom
-	const groups = await dtils.recursiveReadDir('map/tile_groups')
+	const groups = await getMapGroups()
 
 	const viewBox = getMapViewBox(groups)
 	const imageWidth = viewBox.width / spacer
@@ -41,7 +41,7 @@ export async function mapToPng(outFile: string, zoom: number): Promise<void> {
 			image.data[colorIndex + 3] = color[3]
 		}
 
-		progressBar.update(groups.indexOf(group) + 1)
+		await progressBar.update(groups.indexOf(group) + 1)
 	}
 
 	await progressBar.finish()

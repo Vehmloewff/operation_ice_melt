@@ -52,16 +52,16 @@ export interface MapViewBox {
 export function getMapViewBox(groups: string[]): MapViewBox {
 	const points = groups.map(getTileGroupFirstPoint)
 
-	const xValues = points.map((point) => point.x)
-	const yValues = points.map((point) => point.y)
+	const xValues = points.map((point) => point.x * 1000)
+	const yValues = points.map((point) => point.y * 1000)
 
 	const x = Math.min(...xValues)
 	const y = Math.min(...yValues)
 	const maxX = Math.max(...xValues)
 	const maxY = Math.max(...yValues)
 
-	const width = maxX - x
-	const height = maxY - y
+	const width = maxX - x + 1000
+	const height = maxY - y + 1000
 
 	return { x, y, width, height }
 }
