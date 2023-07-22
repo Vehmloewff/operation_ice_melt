@@ -1,10 +1,7 @@
-import { getPathsFromShapeFile } from './geo_shape/mod.ts'
-import { EARTH_LAND_DATA } from './sources.ts'
-import { fillTiles } from './tasks/fill_tiles.ts'
-import { generateTileGroups } from './tasks/mod.ts'
 import { dtils } from './deps.ts'
-import { convertPathsToSvg } from './svg.ts'
 import urls from './urls.json' assert { type: 'json' }
+import * as api from './mod.ts'
+import { ensureIsTerrain } from './map_types.ts'
 
 export async function ci(): Promise<void> {
 	await dtils.check({ permissions: 'all', unstable: true })
@@ -39,7 +36,7 @@ export async function generateGroups(args: string[]): Promise<void> {
 	const width = ensureIsNumArg('width', 2, widthRaw)
 	const height = ensureIsNumArg('height', 3, heightRaw)
 
-	await generateTileGroups({ x, y, width, height })
+	await api.generateTileGroups({ x, y, width, height })
 }
 
 /** Downloads a URL or URL constant (see url urls.json), parses the result as a series of paths, and writes them to temp/paths.json */
@@ -50,12 +47,15 @@ export async function downloadPaths(args: string[]): Promise<void> {
 	// @ts-ignore will always be string because of the '||'
 	const fullUrl = urls[url] || url
 
-	await downloadPaths(fullUrl)
+	await api.downloadPaths(fullUrl)
 }
 
 /** Applies the mercator projection to temp/paths.json */
 export async function projectPaths(): Promise<void> {
-	// TODO
+	const paths = await dtils.readJson('temp/paths.json')
+	if (!Array.isArray(paths)) throw new Error('temp/paths.json does not contain valid data')
+
+	await dtils.writeJson('temp/paths.json', paths.map((path) => path.map(api.applyMercatorProjection)), { separator: '\t' })
 }
 
 /** Applies the paths in temp/paths.json to the current map, filling all polygons with the specified terrain */
@@ -63,7 +63,10 @@ export async function fill(args: string[]): Promise<void> {
 	const [terrain] = args
 	if (!terrain) throw new Error('Expected a terrain as an argument')
 
-	// TODO
+	const paths = await dtils.readJson('temp/paths.json')
+	if (!Array.isArray(paths)) throw new Error('temp/paths.json does not contain valid data')
+
+	await api.fillTiles({ paths, resources: {}, terrain: ensureIsTerrain(terrain) })
 }
 
 /** Builds an SVG of temp/paths.json filling all polygons with the specified color at temp/paths.svg */
@@ -107,19 +110,3 @@ export async function clean(): Promise<void> {
 	await Deno.remove('temp', { recursive: true })
 	await Deno.remove('map', { recursive: true })
 }
-
-// export async function earth(): Promise<void> {
-// 	const size = 24000
-
-// 	console.log('Getting land paths...')
-// 	const paths = await getPathsFromShapeFile(EARTH_LAND_DATA)
-
-// 	console.log('Converting paths into an SVG...')
-// 	await dtils.writeText('temp/map.svg', convertPathsToSvg(paths))
-
-// 	// console.log('Generating tile groups...')
-// 	// await generateTileGroups(size, size)
-
-// 	// console.log('Filling in the land...')
-// 	// await fillTiles({ paths, resources: {}, terrain: 'forest' })
-// }

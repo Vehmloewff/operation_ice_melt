@@ -1,14 +1,5 @@
 import { dtils, pathUtils } from '../deps.ts'
 
-export interface GeoPoint {
-	lat: number
-	long: number
-}
-
-export interface GeoShape {
-	coords: GeoPoint[]
-}
-
 export async function downloadPaths(url: string): Promise<void> {
 	const zipFilePath = 'temp/shape.zip'
 	const shapesDirectoryPath = 'temp/shape'

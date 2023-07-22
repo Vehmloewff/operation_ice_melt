@@ -1,6 +1,5 @@
 import { ProgressBar, progressBarWidgets } from './deps.ts'
 import { sum } from './helpers.ts'
-// import { makeTimeRemainingWidget } from './time_remaining.ts'
 
 // deno-lint-ignore no-explicit-any
 const anySelf = self as any
@@ -10,17 +9,17 @@ export function onTaskReceived<T>(fn: (task: Task<T>) => unknown): void {
 	// deno-lint-ignore no-explicit-any
 	anySelf.onmessage = async (event: any) => await fn(event.data[1])
 
-	anySelf.postMessage('ready')
+	anySelf.postMessage(['ready'])
 }
 
 /** Meant to be run inside a worker context. Notifies the TaskManager that a step in the current task was completed */
 export function registerStep(): void {
-	anySelf.postMessage('step')
+	anySelf.postMessage(['step'])
 }
 
 /** Meant to be run inside a worker context. Notifies the TaskManager that the task is complete */
-export function registerTaskCompletion(): void {
-	anySelf.postMessage('done')
+export function registerTaskCompletion<T>(data: T): void {
+	anySelf.postMessage(['done', data])
 }
 
 export interface Task<T> {
@@ -28,19 +27,19 @@ export interface Task<T> {
 	steps: number
 }
 
-export class TaskManager {
+export type TaskCompleteFn<T> = (data: T) => void
+
+export class TaskManager<CompleteType> {
 	#taskFile: string | URL
 	#tasks: Task<unknown>[] = []
-	// #setupData: unknown
 
-	#onStep: VoidFunction | null = null
+	#stepFn: VoidFunction | null = null
+	#taskCompleteFn: TaskCompleteFn<CompleteType> | null = null
 
-	constructor(
-		taskFile: string | URL,
-		// setupData: unknown,
-	) {
+	constructor(taskFile: string | URL, taskCompleteFn?: TaskCompleteFn<CompleteType>) {
 		this.#taskFile = taskFile
-		// this.#setupData = setupData
+
+		if (taskCompleteFn) this.#taskCompleteFn = taskCompleteFn
 	}
 
 	queueTask<T>(task: Task<T>): void {
@@ -52,18 +51,15 @@ export class TaskManager {
 			total: sum(this.#tasks.map((task) => task.steps)),
 			widgets: [progressBarWidgets.percentageWidget, progressBarWidgets.amountWidget],
 		})
-		await bar.start()
 
 		let step = 0
 
-		this.#onStep = () => {
-			bar.update(++step)
-		}
+		this.#stepFn = () => bar.update(++step)
+		await bar.start()
 
 		await Promise.all(buildArray(navigator.hardwareConcurrency, () => this.#makeTaskRunner()))
 
-		this.#onStep = null
-
+		this.#stepFn = null
 		await bar.finish()
 	}
 
@@ -75,11 +71,9 @@ export class TaskManager {
 
 		await new Promise<void>((resolve) => {
 			worker.onmessage = ({ data }) => {
-				if (data === 'ready') resolve()
+				if (data[0] === 'ready') resolve()
 			}
 		})
-
-		// worker.postMessage(['setup', this.#setupData])
 
 		while (this.#tasks.length) {
 			const task = this.#tasks.shift()
@@ -92,16 +86,19 @@ export class TaskManager {
 	}
 
 	#step() {
-		if (!this.#onStep) throw new Error('Cannot step because there is no progress command running')
+		if (!this.#stepFn) throw new Error('Cannot step because there is no progress command running')
 
-		this.#onStep()
+		this.#stepFn()
 	}
 
 	async #executeTask(worker: Worker, task: Task<unknown>) {
 		const donePromise = new Promise<void>((resolve) => {
 			worker.onmessage = ({ data }) => {
-				if (data === 'step') this.#step()
-				else if (data === 'done') resolve()
+				if (data[0] === 'step') this.#step()
+				else if (data[0] === 'done') {
+					if (this.#taskCompleteFn) this.#taskCompleteFn(data[1])
+					resolve()
+				}
 			}
 		})
 

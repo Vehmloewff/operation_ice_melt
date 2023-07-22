@@ -31,5 +31,5 @@ onTaskReceived<Point>(async ({ data: thousandsPoint, steps }) => {
 
 	await dtils.writeJson(`map/tile_groups/${thousandsPoint.x}x${thousandsPoint.y}.json`, tiles, { separator: '\t' })
 
-	registerTaskCompletion()
+	registerTaskCompletion(null)
 })
