@@ -11,12 +11,8 @@ export interface FillTilesCommand {
 }
 
 onTaskReceived<FillTilesCommand>((task) => {
-	if (task.steps < 1000) throw new Error('There must be and equal or greater amount of steps than tiles in a tile group row')
-
-	const divider = task.data.tiles.length / task.steps
-
 	for (const tile of task.data.tiles) {
-		if (tile.x % divider === 0) registerStep()
+		registerStep()
 
 		for (const path of task.data.paths) {
 			if (!isInsidePolygon({ x: tile.x, y: tile.y }, path)) continue

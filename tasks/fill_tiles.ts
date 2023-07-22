@@ -31,7 +31,7 @@ export async function fillTiles(params: FillTilesParams): Promise<void> {
 					terrain: params.terrain,
 					tiles: taskTiles,
 				},
-				steps: 1000,
+				steps: 100,
 			})
 		}
 
