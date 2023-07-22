@@ -20,9 +20,16 @@ export interface Tile {
 }
 
 export interface Meta {
-	width: number
-	height: number
-	loopX: boolean
+	/** The id of the map */
 	id: string
+	/** The name of the map */
 	name: string
+	/** The start of the map in the X direction */
+	x: number
+	/** The start of the map in the Y direction */
+	y: number
+	/** The width of the map */
+	width: number
+	/** The height of the map */
+	height: number
 }

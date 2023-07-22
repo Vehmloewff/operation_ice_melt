@@ -1,6 +1,7 @@
 import { dtils } from './deps.ts'
 import urls from './urls.json' assert { type: 'json' }
 import * as api from './mod.ts'
+import { Meta } from './map_types.ts'
 
 export async function ci(): Promise<void> {
 	await dtils.check({ permissions: 'all', unstable: true })
@@ -34,6 +35,11 @@ export async function generateGroups(args: string[]): Promise<void> {
 	const height = ensureIsNumArg('height', 3, heightRaw)
 
 	await api.generateTileGroups({ x, y, width, height })
+
+	// Write the meta to contain the new data
+	const meta: Partial<Meta> = await dtils.readJson('map/meta.json')
+	const newMeta: Meta = { id: meta.id || 'new_map', name: meta.id || 'New Map', x, y, height, width }
+	await dtils.writeJson('map/meta.json', newMeta, { separator: '\t' })
 }
 
 /** Downloads a URL or URL constant (see url urls.json), parses the result as a series of paths, and writes them to temp/paths.json */
@@ -133,6 +139,27 @@ export async function mapToPng(args: string[]): Promise<void> {
 	if (isNaN(zoom)) throw new Error(`Expected zoom as a number, but got "${zoomRaw}"`)
 
 	await api.mapToPng('temp/map.png', zoom)
+}
+
+/** Labels the map with `id` and `name` */
+export async function labelMap(args: string[]): Promise<void> {
+	const [id, name] = args
+
+	if (!id) throw new Error('Expected the first argument to be the map id')
+	if (!name) throw new Error('Expected the second argument to be the map name')
+
+	const meta: Partial<Meta> = await dtils.readJson('map/meta.json')
+
+	const newMeta: Meta = {
+		id,
+		name,
+		x: meta.x || 0,
+		y: meta.y || 0,
+		height: meta.height || 0,
+		width: meta.width || 0,
+	}
+
+	await dtils.writeJson('map/meta.json', newMeta, { separator: '\t' })
 }
 
 /** Clean up artifacts from previous jobs */
