@@ -124,6 +124,17 @@ export async function serveSvg(): Promise<void> {
 	await server.finished
 }
 
+/** Converts the current map into a png image. Zoom must be a number less than 1 */
+export async function mapToPng(args: string[]): Promise<void> {
+	const [zoomRaw] = args
+	if (!zoomRaw) throw new Error('Expected a zoom argument')
+
+	const zoom = parseInt(zoomRaw)
+	if (isNaN(zoom)) throw new Error(`Expected zoom as a number, but got "${zoomRaw}"`)
+
+	await api.mapToPng('temp/map.png', zoom)
+}
+
 /** Clean up artifacts from previous jobs */
 export async function clean(): Promise<void> {
 	await Deno.remove('temp', { recursive: true })

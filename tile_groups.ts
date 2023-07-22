@@ -35,3 +35,33 @@ export function getTileGroupFirstPoint(tileGroup: string): Point {
 
 	return { x, y }
 }
+
+export async function getMapGroups(): Promise<string[]> {
+	const groups = await dtils.recursiveReadDir('map/tile_groups')
+
+	return groups.map((group) => group.slice(16, -5))
+}
+
+export interface MapViewBox {
+	x: number
+	y: number
+	width: number
+	height: number
+}
+
+export function getMapViewBox(groups: string[]): MapViewBox {
+	const points = groups.map(getTileGroupFirstPoint)
+
+	const xValues = points.map((point) => point.x)
+	const yValues = points.map((point) => point.y)
+
+	const x = Math.min(...xValues)
+	const y = Math.min(...yValues)
+	const maxX = Math.max(...xValues)
+	const maxY = Math.max(...yValues)
+
+	const width = maxX - x
+	const height = maxY - y
+
+	return { x, y, width, height }
+}
