@@ -22,11 +22,14 @@ for shape in feature:
 				if type(coords) is float:
 					continue
 
-				item.append({ 'lat': coords[1], 'long': coords[0] })
+				item.append({
+					'x': coords[0],
+					'y': coords[1],
+				})
 	
-			record.append({ 'coords': item })
+			record.append(item)
 
-json_object = json.dumps(record)
+json_object = json.dumps(record, indent="\t")
 
 with open(jsonFile, "w") as outfile:
     outfile.write(json_object)

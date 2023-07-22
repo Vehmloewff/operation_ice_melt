@@ -4,6 +4,7 @@ import { fillTiles } from './tasks/fill_tiles.ts'
 import { generateTileGroups } from './tasks/mod.ts'
 import { dtils } from './deps.ts'
 import { convertPathsToSvg } from './svg.ts'
+import urls from './urls.json' assert { type: 'json' }
 
 export async function ci(): Promise<void> {
 	await dtils.check({ permissions: 'all', unstable: true })
@@ -41,12 +42,15 @@ export async function generateGroups(args: string[]): Promise<void> {
 	await generateTileGroups({ x, y, width, height })
 }
 
-/** Downloads a URL or URL constant (see url url_constants.ts), parses the result as a series of paths, and writes them to temp/paths.json */
+/** Downloads a URL or URL constant (see url urls.json), parses the result as a series of paths, and writes them to temp/paths.json */
 export async function downloadPaths(args: string[]): Promise<void> {
 	const [url] = args
 	if (!url) throw new Error('Expected a URL as an argument')
 
-	// TODO
+	// @ts-ignore will always be string because of the '||'
+	const fullUrl = urls[url] || url
+
+	await downloadPaths(fullUrl)
 }
 
 /** Applies the mercator projection to temp/paths.json */

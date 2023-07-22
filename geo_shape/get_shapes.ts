@@ -9,12 +9,10 @@ export interface GeoShape {
 	coords: GeoPoint[]
 }
 
-export async function getMapShapes(url: string): Promise<GeoShape[]> {
+export async function downloadPaths(url: string): Promise<void> {
 	const zipFilePath = 'temp/shape.zip'
 	const shapesDirectoryPath = 'temp/shape'
-	const shapeJsonPath = 'temp/shapes.json'
-
-	if (await dtils.exists(shapeJsonPath)) return await dtils.readJson(shapeJsonPath)
+	const shapeJsonPath = 'temp/paths.json'
 
 	console.log('Downloading...')
 	const response = await fetch(url)
@@ -28,10 +26,7 @@ export async function getMapShapes(url: string): Promise<GeoShape[]> {
 	const shapeFilePath = await findFileWithExtension(shapesDirectoryPath, 'shp')
 
 	console.log('Parsing shapes file...')
-	await runPythonScript('geo_shape/shape_to_json.py', [shapeFilePath, shapeJsonPath])
-
-	console.log('Loading parsed data...')
-	return await dtils.readJson(shapeJsonPath)
+	await runPythonScript('download_paths/shape_to_json.py', [shapeFilePath, shapeJsonPath])
 }
 
 async function unzipPath(zipPath: string, outputPath: string) {
