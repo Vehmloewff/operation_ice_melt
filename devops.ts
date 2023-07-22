@@ -1,7 +1,6 @@
 import { dtils } from './deps.ts'
 import urls from './urls.json' assert { type: 'json' }
 import * as api from './mod.ts'
-import { ensureIsTerrain } from './map_types.ts'
 
 export async function ci(): Promise<void> {
 	await dtils.check({ permissions: 'all', unstable: true })
@@ -28,8 +27,6 @@ export async function generateGroups(args: string[]): Promise<void> {
 	}
 
 	const [xRaw, yRaw, widthRaw, heightRaw] = args
-
-	console.log(args, heightRaw)
 
 	const x = ensureIsNumArg('x', 0, xRaw)
 	const y = ensureIsNumArg('y', 1, yRaw)
@@ -66,7 +63,7 @@ export async function fill(args: string[]): Promise<void> {
 	const paths = await dtils.readJson('temp/paths.json')
 	if (!Array.isArray(paths)) throw new Error('temp/paths.json does not contain valid data')
 
-	await api.fillTiles({ paths, resources: {}, terrain: ensureIsTerrain(terrain) })
+	await api.fillTiles({ paths, resources: {}, terrain: api.ensureIsTerrain(terrain) })
 }
 
 /** Builds an SVG of temp/paths.json filling all polygons with the specified color at temp/paths.svg */
@@ -74,7 +71,10 @@ export async function buildPathsSvg(args: string[]): Promise<void> {
 	const [color] = args
 	if (!color) throw new Error('Expected a color as an argument')
 
-	// TODO
+	const paths = await dtils.readJson('temp/paths.json')
+	if (!Array.isArray(paths)) throw new Error('temp/paths.json does not contain valid data')
+
+	await dtils.writeText('temp/paths.svg', api.convertPathsToSvg(paths))
 }
 
 /** Applies a grid to temp/paths.svg with `color` at intervals of `interval` */
@@ -86,23 +86,42 @@ export async function applySvgGrid(args: string[]): Promise<void> {
 	const interval = parseInt(intervalRaw)
 	if (isNaN(interval)) throw new Error(`Expected an interval as a number, but got "${intervalRaw}"`)
 
-	// TODO
+	const svg = await dtils.readText('temp/paths.svg')
+	if (!svg) throw new Error('There is no temp/paths.svg')
+
+	await dtils.writeText('temp/paths.svg', api.applySvgGrid(svg, color, interval))
 }
 
 /** Adds a dot at `x`,`y` with `color` */
 export async function markSvgPoint(args: string[]): Promise<void> {
-	const [x, y, color] = args
+	const [xRaw, yRaw, color] = args
 
-	// TODO validate x and y
+	const x = parseInt(xRaw)
+	if (isNaN(x)) throw new Error(`Expected an X coordinate as a number, but got "${xRaw}"`)
+
+	const y = parseInt(yRaw)
+	if (isNaN(y)) throw new Error(`Expected an X coordinate as a number, but got "${yRaw}"`)
 
 	if (!color) throw new Error('Expected a color as an argument')
 
-	// TODO
+	const svg = await dtils.readText('temp/paths.svg')
+	if (!svg) throw new Error('There is no temp/paths.svg')
+
+	await dtils.writeText('temp/paths.svg', api.markSvgPoint(svg, { x, y }, color))
 }
 
 /** Serve temp/paths.svg */
 export async function serveSvg(): Promise<void> {
-	// TODO
+	const server = Deno.serve({ port: 4000 }, async () => {
+		const svg = await dtils.readText('temp/paths.svg')
+		if (!svg) return new Response('No temp/paths.svg exists', { status: 404 })
+
+		return new Response(svg, {
+			headers: { 'content-type': 'image/svg+xml' },
+		})
+	})
+
+	await server.finished
 }
 
 /** Clean up artifacts from previous jobs */

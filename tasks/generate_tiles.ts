@@ -15,8 +15,8 @@ export interface GenerateTileGroupsParams {
 export async function generateTileGroups(params: GenerateTileGroupsParams): Promise<void> {
 	const manager = new TaskManager(new URL('./generate_tiles.worker.ts', import.meta.url))
 
-	for (let verticalIndex = 0; verticalIndex < params.height; verticalIndex++) {
-		for (let horizontalIndex = 0; horizontalIndex < params.width; horizontalIndex++) {
+	for (let verticalIndex = params.y; verticalIndex < params.y + params.height; verticalIndex++) {
+		for (let horizontalIndex = params.x; horizontalIndex < params.x + params.width; horizontalIndex++) {
 			manager.queueTask<Point>({ data: { x: horizontalIndex, y: verticalIndex }, steps: 1000 })
 		}
 	}
